@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Brand Blue to Green Gradient -->
+    <linearGradient id="urnoted-grad" x1="0%" y1="80%" x2="100%" y2="20%">
+      <stop offset="0%" stop-color="#0B47BD" />
+      <stop offset="25%" stop-color="#0056D6" />
+      <stop offset="55%" stop-color="#0088A8" />
+      <stop offset="80%" stop-color="#00A859" />
+      <stop offset="100%" stop-color="#0F9D58" />
+    </linearGradient>
+
+    <linearGradient id="urnoted-check" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0A3B99" />
+      <stop offset="40%" stop-color="#0B47BD" />
+      <stop offset="85%" stop-color="#009A52" />
+      <stop offset="100%" stop-color="#0F9D58" />
+    </linearGradient>
+
+    <!-- Soft ambient glow -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0B47BD" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- Clean crisp background for browser tabs -->
+  <rect width="512" height="512" rx="112" fill="#FFFFFF" />
+  
+  <g filter="url(#glow)">
+    <!-- Outer Ring (O-Shape) -->
+    <path
+      d="M 368 165
+         C 334 118, 275 96, 218 106
+         C 152 118, 102 172, 96 238
+         C 90 310, 138 376, 208 396
+         C 280 416, 356 380, 388 314
+         C 400 289, 406 261, 404 233"
+      fill="none"
+      stroke="url(#urnoted-grad)"
+      stroke-width="48"
+      stroke-linecap="round"
+    />
+
+    <!-- Dynamic Checkmark -->
+    <path
+      d="M 184 254
+         L 242 312
+         L 378 152"
+      fill="none"
+      stroke="url(#urnoted-check)"
+      stroke-width="50"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>
