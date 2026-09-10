@@ -10,6 +10,15 @@ export const AuthProvider = ({ children }) => {
   // Initialize and check current session
   useEffect(() => {
     const initAuth = async () => {
+      const storedAccessToken = localStorage.getItem("accessToken");
+      const storedRefreshToken = localStorage.getItem("refreshToken");
+
+      if (!storedAccessToken && !storedRefreshToken) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await API.get("/auth/me");
         setUser(response.data.user);
