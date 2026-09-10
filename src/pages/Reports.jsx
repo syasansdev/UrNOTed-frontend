@@ -4,7 +4,10 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { FileDown, FileSpreadsheet, Loader2, History, Database } from "lucide-react";
 
-const rawBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://urnoted-backend.onrender.com");
+const envUrl = import.meta.env.VITE_API_URL;
+const rawBaseUrl = (envUrl && !envUrl.includes("fly.dev"))
+  ? envUrl
+  : (import.meta.env.DEV ? "http://localhost:5000" : "https://urnoted-backend.onrender.com");
 const BASE_URL = rawBaseUrl.endsWith("/") ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
 
 export default function Reports() {

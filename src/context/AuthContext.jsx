@@ -28,7 +28,10 @@ export const AuthProvider = ({ children }) => {
           try {
             const storedRefreshToken = localStorage.getItem("refreshToken");
             if (storedRefreshToken) {
-              const rawBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "https://urnoted-backend.onrender.com");
+              const envUrl = import.meta.env.VITE_API_URL;
+              const rawBaseUrl = (envUrl && !envUrl.includes("fly.dev"))
+                ? envUrl
+                : (import.meta.env.DEV ? "http://localhost:5000" : "https://urnoted-backend.onrender.com");
               const BASE_URL = rawBaseUrl.endsWith("/") ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
               const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
                 method: "POST",
