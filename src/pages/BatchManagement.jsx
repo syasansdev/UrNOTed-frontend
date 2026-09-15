@@ -440,7 +440,7 @@ export default function BatchManagement() {
                   <option value="" className="text-slate-900">-- Select Trainer --</option>
                   {trainers.map((t) => (
                     <option key={t.id} value={t.id} className="text-slate-900">
-                      {t.name} ({t.email})
+                      {t.name}
                     </option>
                   ))}
                 </select>
