@@ -10,7 +10,7 @@ import { Loader2, CheckCircle2, AlertOctagon, Mail, User, School, Calendar, Book
 const schema = z.object({
   registerNumber: z.string().min(2, "Register number is required"),
   name: z.string().min(2, "Full name must be at least 2 characters"),
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
   department: z.string().min(2, "Department is required"),
   institution: z.string().min(2, "Institution is required")
 });
@@ -159,7 +159,7 @@ export default function StudentRegistration() {
             {/* Email Address */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Email Address
+                Email Address <span className="text-slate-400 font-normal lowercase">(optional)</span>
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">

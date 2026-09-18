@@ -15,14 +15,18 @@ import {
   Copy,
   GraduationCap,
   ClipboardCheck,
-  CheckCircle2
+  CheckCircle2,
+  FileSpreadsheet
 } from "lucide-react";
+import StudentExcelUploadModal from "../components/StudentExcelUploadModal";
 
 const schema = z.object({
   name: z.string().min(3, "Batch name must be at least 3 characters"),
   code: z.string().min(2, "Batch code must be at least 2 characters"),
   institution: z.string().min(2, "Institution is required"),
   department: z.string().min(2, "Department is required"),
+  classroomNumber: z.string().optional().or(z.literal("")),
+  blockName: z.string().optional().or(z.literal("")),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
   totalDays: z.coerce.number().int().positive("Total days must be positive"),
@@ -40,6 +44,7 @@ export default function BatchManagement() {
   const [submitting, setSubmitting] = useState(false);
   const [institutions, setInstitutions] = useState([]);
   const [selectedInstitution, setSelectedInstitution] = useState("");
+  const [uploadBatchId, setUploadBatchId] = useState(null);
 
   const {
     register,
@@ -92,7 +97,18 @@ export default function BatchManagement() {
 
   const openCreateModal = () => {
     setEditingBatch(null);
-    reset({ name: "", code: "", institution: "", department: "", startDate: "", endDate: "", totalDays: 10, trainerId: "" });
+    reset({
+      name: "",
+      code: "",
+      institution: "",
+      department: "",
+      classroomNumber: "",
+      blockName: "",
+      startDate: "",
+      endDate: "",
+      totalDays: 10,
+      trainerId: ""
+    });
     setModalOpen(true);
   };
 
@@ -103,6 +119,8 @@ export default function BatchManagement() {
       code: batch.code,
       institution: batch.institution || "",
       department: batch.department || "",
+      classroomNumber: batch.classroomNumber || "",
+      blockName: batch.blockName || "",
       startDate: new Date(batch.startDate).toISOString().split("T")[0],
       endDate: new Date(batch.endDate).toISOString().split("T")[0],
       totalDays: batch.totalDays,
@@ -261,6 +279,12 @@ export default function BatchManagement() {
                       {batch.department}
                     </p>
                   )}
+                  {(batch.blockName || batch.classroomNumber) && (
+                    <p>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">Location: </span>
+                      {[batch.blockName, batch.classroomNumber ? `Room ${batch.classroomNumber}` : ""].filter(Boolean).join(" - ")}
+                    </p>
+                  )}
                   <p>
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Timeline: </span>
                     {new Date(batch.startDate).toLocaleDateString()} - {new Date(batch.endDate).toLocaleDateString()}
@@ -300,6 +324,15 @@ export default function BatchManagement() {
                 >
                   <Copy size={14} />
                 </button>
+                {user?.role === "ADMIN" && (
+                  <button
+                    onClick={() => setUploadBatchId(batch.id)}
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
+                    title="Upload Students via Excel"
+                  >
+                    <FileSpreadsheet size={14} />
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -365,6 +398,38 @@ export default function BatchManagement() {
                 {errors.department && (
                   <p className="mt-1 text-xs text-rose-500 font-medium">{errors.department.message}</p>
                 )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    Block Name
+                  </label>
+                  <input
+                    type="text"
+                    {...register("blockName")}
+                    className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    placeholder="e.g. Main Block, AI Block"
+                  />
+                  {errors.blockName && (
+                    <p className="mt-1 text-xs text-rose-500 font-medium">{errors.blockName.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    Classroom Number
+                  </label>
+                  <input
+                    type="text"
+                    {...register("classroomNumber")}
+                    className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    placeholder="e.g. 101, A-204, LAB-3"
+                  />
+                  {errors.classroomNumber && (
+                    <p className="mt-1 text-xs text-rose-500 font-medium">{errors.classroomNumber.message}</p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -470,6 +535,17 @@ export default function BatchManagement() {
           </div>
         </div>
       )}
+
+      {/* Excel Upload Modal */}
+      <StudentExcelUploadModal
+        isOpen={Boolean(uploadBatchId)}
+        onClose={() => setUploadBatchId(null)}
+        batches={batches}
+        defaultBatchId={uploadBatchId || ""}
+        onSuccess={() => {
+          fetchBatches();
+        }}
+      />
     </div>
   );
 }

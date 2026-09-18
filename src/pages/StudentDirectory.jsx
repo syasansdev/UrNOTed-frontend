@@ -3,7 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import { Loader2, Search, Trash2, GraduationCap, Filter } from "lucide-react";
+import { Loader2, Search, Trash2, GraduationCap, Filter, FileSpreadsheet } from "lucide-react";
+import StudentExcelUploadModal from "../components/StudentExcelUploadModal";
 
 export default function StudentDirectory() {
   const { user } = useAuth();
@@ -13,6 +14,7 @@ export default function StudentDirectory() {
   const [students, setStudents] = useState([]);
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   
   // Filters
   const [searchText, setSearchText] = useState("");
@@ -68,11 +70,22 @@ export default function StudentDirectory() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Student Directory</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">
-          Search and view student cohorts across different batches.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Student Directory</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            Search and view student cohorts across different batches.
+          </p>
+        </div>
+        {user?.role === "ADMIN" && (
+          <button
+            onClick={() => setUploadModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-md cursor-pointer transition-all duration-200"
+          >
+            <FileSpreadsheet size={16} />
+            <span>Upload Students Excel</span>
+          </button>
+        )}
       </div>
 
       {/* Filter Toolbar */}
@@ -190,6 +203,17 @@ export default function StudentDirectory() {
           </div>
         </div>
       )}
+
+      {/* Excel Upload Modal */}
+      <StudentExcelUploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        batches={batches}
+        defaultBatchId={selectedBatchId}
+        onSuccess={() => {
+          fetchData();
+        }}
+      />
     </div>
   );
 }
