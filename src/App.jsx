@@ -26,6 +26,9 @@ import SearchResults from "./pages/SearchResults";
 import SuspiciousDashboard from "./pages/SuspiciousDashboard";
 import AuditLogs from "./pages/AuditLogs";
 import AttendanceMarking from "./pages/AttendanceMarking";
+import AttendanceMatrix from "./pages/AttendanceMatrix";
+import BatchConfiguration from "./pages/BatchConfiguration";
+import AuthorizationManagement from "./pages/AuthorizationManagement";
 import { NotFound, Forbidden } from "./pages/ErrorPages";
 
 
@@ -56,14 +59,16 @@ export default function App() {
             <Route path="/attendance/:token" element={<AttendanceMarking />} />
 
             {/* PROTECTED AUTHENTICATED ROUTES */}
-            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "TRAINER"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "TRAINER", "PLACEMENT_OFFICER"]} />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 
                 {/* Batches and Students accessible by both, with role-specific filters */}
                 <Route path="/batches" element={<BatchManagement />} />
+                <Route path="/batches/configure/:programId" element={<BatchConfiguration />} />
                 <Route path="/students" element={<StudentDirectory />} />
+                <Route path="/attendance/matrix/:batchId" element={<AttendanceMatrix />} />
                 <Route path="/attendance/batch/:batchId/day/:dayIndex" element={<AttendanceSheet />} />
                 <Route path="/suspicious-activity" element={<SuspiciousDashboard />} />
                 <Route path="/audit-logs" element={<AuditLogs />} />
@@ -75,17 +80,17 @@ export default function App() {
             </Route>
 
             {/* SHARED AUTHENTICATED ROUTES */}
-            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "TRAINER", "STUDENT"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "TRAINER", "PLACEMENT_OFFICER", "STUDENT"]} />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>
 
-
             {/* ADMIN ONLY ROUTES */}
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/trainers" element={<TrainerManagement />} />
+                <Route path="/authorizations" element={<AuthorizationManagement />} />
                 <Route path="/settings" element={<Settings />} />
               </Route>
             </Route>

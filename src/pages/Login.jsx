@@ -14,11 +14,14 @@ const schema = z.object({
 });
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, emailLogin } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
   const [submitting, setSubmitting] = useState(false);
+  const [loginType, setLoginType] = useState("trainer_placement"); // "trainer_placement" | "admin"
+  const [emailOnly, setEmailOnly] = useState("");
+  const [emailOnlyError, setEmailOnlyError] = useState("");
   const [mode, setMode] = useState("login"); // "login" | "forgot" | "reset"
   const [emailForReset, setEmailForReset] = useState("");
 
@@ -66,6 +69,36 @@ export default function Login() {
     }
   };
 
+  const onEmailOnlySubmit = async (e) => {
+    e.preventDefault();
+    setEmailOnlyError("");
+    if (!emailOnly || !emailOnly.trim()) {
+      setEmailOnlyError("Please enter your authorized email ID");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await emailLogin(emailOnly.trim());
+      toast.success("Welcome to URNOted!");
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      } else {
+        if (res?.user?.role === "STUDENT") {
+          navigate("/profile");
+        } else {
+          navigate("/dashboard");
+        }
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || "Your email ID has not been authorized. Please contact the administrator.";
+      setEmailOnlyError(msg);
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
     if (!forgotEmail) {
@@ -106,8 +139,9 @@ export default function Login() {
         code: resetCode,
         newPassword
       });
-      toast.success("Password reset successful! Please sign in with your new password.");
+      toast.success("Password reset successfully! Please log in.");
       setMode("login");
+      setLoginType("admin");
       setResetCode("");
       setNewPassword("");
       setConfirmPassword("");
@@ -126,7 +160,7 @@ export default function Login() {
             Forgot Password
           </h2>
           <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-            Enter your registered email address to receive a verification code.
+            Enter your admin email address to receive a verification code
           </p>
         </div>
 
@@ -144,7 +178,8 @@ export default function Login() {
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all duration-200"
-               
+                placeholder="admin@example.com"
+                required
               />
             </div>
           </div>
@@ -301,89 +336,166 @@ export default function Login() {
           Sign In
         </h2>
         <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-          Enter credentials to access your dashboard
+          Select role and sign in to URNOted
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Email Field */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-            Email Address
-          </label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 dark:text-slate-500">
-              <Mail size={16} />
-            </span>
-            <input
-              type="email"
-              {...register("email")}
-              className={`w-full pl-10 pr-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 outline-none transition-all duration-200 ${errors.email
-                  ? "border-rose-500 focus:ring-1 focus:ring-rose-500"
-                  : "border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                }`}
-            />
-          </div>
-          {errors.email && (
-            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.email.message}</p>
-          )}
-        </div>
-
-        {/* Password Field */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-            Password
-          </label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 dark:text-slate-500">
-              <Lock size={16} />
-            </span>
-            <input
-              type={showPassword ? "text" : "password"}
-              {...register("password")}
-              className={`w-full pl-10 pr-10 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 outline-none transition-all duration-200 ${errors.password
-                  ? "border-rose-500 focus:ring-1 focus:ring-rose-500"
-                  : "border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                }`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none transition-colors duration-150 cursor-pointer"
-            >
-              {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-            </button>
-          </div>
-          {errors.password && (
-            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.password.message}</p>
-          )}
-          <div className="flex justify-end mt-1.5">
-            <button
-              type="button"
-              onClick={() => setMode("forgot")}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
-            >
-              Forgot Password?
-            </button>
-          </div>
-        </div>
-
-        {/* Submit Button */}
+      {/* Role Selection Tabs */}
+      <div className="flex rounded-lg bg-slate-100 dark:bg-slate-800/80 p-1 border border-slate-200 dark:border-slate-700">
         <button
-          type="submit"
-          disabled={submitting}
-          className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20 active:scale-[0.98] transition-all duration-150 cursor-pointer"
+          type="button"
+          onClick={() => {
+            setLoginType("passwordless");
+            setEmailOnlyError("");
+          }}
+          className={`flex-1 py-2 text-xs font-semibold rounded-md transition-all ${
+            loginType === "passwordless"
+              ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+              : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+          }`}
         >
-          {submitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Verifying...</span>
-            </>
-          ) : (
-            <span>Sign In</span>
-          )}
+          Trainer / Placement Officer
         </button>
-      </form>
+        <button
+          type="button"
+          onClick={() => {
+            setLoginType("admin");
+            setEmailOnlyError("");
+          }}
+          className={`flex-1 py-2 text-xs font-semibold rounded-md transition-all ${
+            loginType === "admin"
+              ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+              : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+          }`}
+        >
+          Administrator
+        </button>
+      </div>
+
+      {loginType === "passwordless" ? (
+        /* PASSWORDLESS EMAIL-ONLY LOGIN FOR TRAINER & PLACEMENT OFFICER */
+        <form onSubmit={onEmailOnlySubmit} className="space-y-4">
+          <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-lg border border-indigo-100 dark:border-indigo-900/40 text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold text-indigo-600 dark:text-indigo-400">Passwordless Direct Access:</span> No password required. Enter your authorized company email address to log in.
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+              Email Address
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 dark:text-slate-500">
+                <Mail size={16} />
+              </span>
+              <input
+                type="email"
+                value={emailOnly}
+                onChange={(e) => setEmailOnly(e.target.value)}
+                placeholder="name@company.com"
+                className="w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all duration-200"
+                required
+              />
+            </div>
+            {emailOnlyError && (
+              <p className="mt-2 text-xs text-rose-500 font-medium">{emailOnlyError}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20 active:scale-[0.98] transition-all duration-150 cursor-pointer"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Verifying Access...</span>
+              </>
+            ) : (
+              <span>Log In</span>
+            )}
+          </button>
+        </form>
+      ) : (
+        /* STANDARD ADMIN LOGIN WITH PASSWORD */
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+              Email Address
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 dark:text-slate-500">
+                <Mail size={16} />
+              </span>
+              <input
+                type="email"
+                {...register("email")}
+                placeholder="admin@example.com"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 outline-none transition-all duration-200 ${errors.email
+                    ? "border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    : "border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  }`}
+              />
+            </div>
+            {errors.email && (
+              <p className="mt-1 text-xs text-rose-500 font-medium">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 dark:text-slate-500">
+                <Lock size={16} />
+              </span>
+              <input
+                type={showPassword ? "text" : "password"}
+                {...register("password")}
+                className={`w-full pl-10 pr-10 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 outline-none transition-all duration-200 ${errors.password
+                    ? "border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    : "border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none transition-colors duration-150 cursor-pointer"
+              >
+                {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="mt-1 text-xs text-rose-500 font-medium">{errors.password.message}</p>
+            )}
+            <div className="flex justify-end mt-1.5">
+              <button
+                type="button"
+                onClick={() => setMode("forgot")}
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+              >
+                Forgot Password?
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20 active:scale-[0.98] transition-all duration-150 cursor-pointer"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Verifying...</span>
+              </>
+            ) : (
+              <span>Sign In as Admin</span>
+            )}
+          </button>
+        </form>
+      )}
     </div>
   );
 }

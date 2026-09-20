@@ -29,18 +29,26 @@ export default function Reports() {
   const fetchOptions = async () => {
     setLoadingOptions(true);
     try {
-      const [batchRes, studentRes] = await Promise.all([
+      const [batchRes, studentRes] = await Promise.allSettled([
         API.get("/batches"),
         API.get("/students")
       ]);
-      setBatches(batchRes.data);
-      setStudents(studentRes.data);
 
-      if (batchRes.data.length > 0) {
-        setSelectedBatchId(batchRes.data[0].id);
+      const loadedBatches = batchRes.status === "fulfilled" ? batchRes.value.data : [];
+      const loadedStudents = studentRes.status === "fulfilled" ? studentRes.value.data : [];
+
+      setBatches(loadedBatches);
+      setStudents(loadedStudents);
+
+      if (loadedBatches.length > 0) {
+        setSelectedBatchId(loadedBatches[0].id || "");
+      } else {
+        setSelectedBatchId("");
       }
-      if (studentRes.data.length > 0) {
-        setSelectedStudentId(studentRes.data[0].id);
+      if (loadedStudents.length > 0) {
+        setSelectedStudentId(loadedStudents[0].id || "");
+      } else {
+        setSelectedStudentId("");
       }
     } catch (err) {
       toast.error("Failed to load options");

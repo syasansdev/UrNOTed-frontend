@@ -11,7 +11,7 @@ const createSchema = z.object({
   email: z.string()
     .min(1, "Email is required")
     .email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters")
+  password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal(""))
 });
 
 const editSchema = z.object({
@@ -231,27 +231,8 @@ export default function TrainerManagement() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                  Password {editingTrainer && <span className="text-[10px] text-slate-400 lowercase">(leave blank to keep unchanged)</span>}
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    {...register("password")}
-                    className="w-full pl-4 pr-10 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none transition-colors duration-150 cursor-pointer"
-                  >
-                    {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="mt-1 text-xs text-rose-500 font-medium">{errors.password.message}</p>
-                )}
+              <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-lg border border-indigo-100 dark:border-indigo-900/40 text-xs text-slate-600 dark:text-slate-400">
+                <span className="font-semibold text-indigo-600 dark:text-indigo-400">Passwordless Access:</span> Trainers do not require passwords. They can log in instantly with their company email address.
               </div>
 
               <div className="flex justify-end gap-3 mt-6">

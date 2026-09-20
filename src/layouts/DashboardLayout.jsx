@@ -35,6 +35,7 @@ export const DashboardLayout = () => {
 
   const adminMenu = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Authorizations", path: "/authorizations", icon: Users },
     { label: "Trainers", path: "/trainers", icon: Users },
     { label: "Batches", path: "/batches", icon: FolderKanban },
     { label: "Students", path: "/students", icon: GraduationCap },
@@ -51,6 +52,13 @@ export const DashboardLayout = () => {
     { label: "Profile", path: "/profile", icon: User }
   ];
 
+  const placementOfficerMenu = [
+    { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Batches", path: "/batches", icon: FolderKanban },
+    { label: "Reports", path: "/reports", icon: FileSpreadsheet },
+    { label: "Profile", path: "/profile", icon: User }
+  ];
+
   const studentMenu = [
     { label: "Profile", path: "/profile", icon: User }
   ];
@@ -60,6 +68,8 @@ export const DashboardLayout = () => {
       ? adminMenu
       : user?.role === "TRAINER"
       ? trainerMenu
+      : user?.role === "PLACEMENT_OFFICER"
+      ? placementOfficerMenu
       : studentMenu;
 
   return (

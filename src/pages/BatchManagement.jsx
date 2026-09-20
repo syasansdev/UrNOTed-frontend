@@ -16,9 +16,15 @@ import {
   GraduationCap,
   ClipboardCheck,
   CheckCircle2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Sparkles,
+  Grid,
+  FolderKanban,
+  UserPlus
 } from "lucide-react";
 import StudentExcelUploadModal from "../components/StudentExcelUploadModal";
+import AddStudentManualModal from "../components/AddStudentManualModal";
+import CreateTrainingModal from "./CreateTrainingModal";
 
 const schema = z.object({
   name: z.string().min(3, "Batch name must be at least 3 characters"),
@@ -45,6 +51,8 @@ export default function BatchManagement() {
   const [institutions, setInstitutions] = useState([]);
   const [selectedInstitution, setSelectedInstitution] = useState("");
   const [uploadBatchId, setUploadBatchId] = useState(null);
+  const [manualStudentBatch, setManualStudentBatch] = useState(null);
+  const [trainingModalOpen, setTrainingModalOpen] = useState(false);
 
   const {
     register,
@@ -210,13 +218,22 @@ export default function BatchManagement() {
             </select>
           </div>
           {user?.role === "ADMIN" && (
-            <button
-              onClick={openCreateModal}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-md cursor-pointer transition-all duration-200"
-            >
-              <Plus size={16} />
-              <span>Create Batch</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setTrainingModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold shadow-md cursor-pointer transition-all duration-200"
+              >
+                <Sparkles size={16} />
+                <span>Create Training Program</span>
+              </button>
+              <button
+                onClick={openCreateModal}
+                className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200"
+              >
+                <Plus size={16} />
+                <span>Single Batch</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -303,20 +320,29 @@ export default function BatchManagement() {
               <div className="flex items-center gap-2 mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-800/40">
                 <button
                   onClick={() => navigate(`/students?batchId=${batch.id}`)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
                   title="View Student List"
                 >
                   <GraduationCap size={14} />
                   <span>Students</span>
                 </button>
                 <button
-                  onClick={() => navigateToAttendance(batch.id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
-                  title="Record/Update Attendance"
+                  onClick={() => navigate(`/attendance/matrix/${batch.id}`)}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 cursor-pointer transition-colors"
+                  title="View Attendance Sheet"
                 >
-                  <ClipboardCheck size={14} />
+                  <Grid size={14} />
                   <span>Attendance</span>
                 </button>
+                {batch.trainingProgramId && user?.role === "ADMIN" && (
+                  <button
+                    onClick={() => navigate(`/batches/configure/${batch.trainingProgramId}`)}
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
+                    title="Configure Training Program Batches"
+                  >
+                    <FolderKanban size={14} />
+                  </button>
+                )}
                 <button
                   onClick={() => copyRegistrationLink(batch.registrationToken)}
                   className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
@@ -325,13 +351,22 @@ export default function BatchManagement() {
                   <Copy size={14} />
                 </button>
                 {user?.role === "ADMIN" && (
-                  <button
-                    onClick={() => setUploadBatchId(batch.id)}
-                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
-                    title="Upload Students via Excel"
-                  >
-                    <FileSpreadsheet size={14} />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setManualStudentBatch(batch)}
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
+                      title="Add Student Manually"
+                    >
+                      <UserPlus size={14} />
+                    </button>
+                    <button
+                      onClick={() => setUploadBatchId(batch.id)}
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
+                      title="Upload Students via Excel"
+                    >
+                      <FileSpreadsheet size={14} />
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -542,6 +577,29 @@ export default function BatchManagement() {
         onClose={() => setUploadBatchId(null)}
         batches={batches}
         defaultBatchId={uploadBatchId || ""}
+        onSuccess={() => {
+          fetchBatches();
+        }}
+      />
+
+      {/* Initial Training Creation Modal */}
+      <CreateTrainingModal
+        isOpen={trainingModalOpen}
+        onClose={() => setTrainingModalOpen(false)}
+        institutions={institutions}
+        onSuccess={(createdData) => {
+          fetchBatches();
+          if (createdData?.program?.id) {
+            navigate(`/batches/configure/${createdData.program.id}`);
+          }
+        }}
+      />
+
+      {/* Manual Student Addition Modal */}
+      <AddStudentManualModal
+        isOpen={Boolean(manualStudentBatch)}
+        onClose={() => setManualStudentBatch(null)}
+        batch={manualStudentBatch}
         onSuccess={() => {
           fetchBatches();
         }}

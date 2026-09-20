@@ -93,6 +93,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const emailLogin = async (email) => {
+    setLoading(true);
+    try {
+      const response = await API.post("/auth/email-login", { email });
+      if (response.data?.accessToken) {
+        localStorage.setItem("accessToken", response.data.accessToken);
+      }
+      if (response.data?.refreshToken) {
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+      }
+      setUser(response.data.user);
+      return response.data;
+    } catch (err) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      setUser(null);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       await API.post("/auth/logout");
@@ -113,7 +135,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, updateProfile }}>
+    <AuthContext.Provider value={{ user, login, emailLogin, logout, loading, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
