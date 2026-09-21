@@ -43,7 +43,7 @@ export default function BatchConfiguration() {
       for (const b of res.data.batches) {
         forms[b.id] = {
           name: b.name,
-          yearOfStudy: (b.yearOfStudy || (!b.name?.startsWith("Batch ") ? b.name : "")),
+          yearOfStudy: b.yearOfStudy || "",
           department: b.department || "",
           blockName: b.blockName || "",
           classroomNumber: b.classroomNumber || "",
@@ -94,8 +94,7 @@ export default function BatchConfiguration() {
         department: formData.department,
         blockName: formData.blockName,
         classroomNumber: formData.classroomNumber,
-        yearOfStudy: formData.yearOfStudy,
-        ...(formData.yearOfStudy ? { name: formData.yearOfStudy } : {})
+        yearOfStudy: formData.yearOfStudy || ""
       };
       await API.patch(`/training-programs/batches/${batchId}/configure`, payload);
       toast.success("Batch configuration saved!");

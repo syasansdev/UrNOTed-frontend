@@ -28,6 +28,7 @@ import CreateTrainingModal from "./CreateTrainingModal";
 
 const schema = z.object({
   name: z.string().optional().or(z.literal("")),
+  yearOfStudy: z.string().optional().or(z.literal("")),
   code: z.string().optional().or(z.literal("")),
   institution: z.string().min(2, "Institution is required"),
   department: z.string().min(2, "Department is required"),
@@ -103,10 +104,17 @@ export default function BatchManagement() {
     fetchSettings();
   }, [user, selectedInstitution]);
 
+  const getBatchDisplayName = (batch) => {
+    if (!batch) return "";
+    const bNum = batch.code?.split("-")[0]?.replace("B", "") || "1";
+    return `Batch ${bNum} ${batch.institution || ""}`.trim();
+  };
+
   const openCreateModal = () => {
     setEditingBatch(null);
     reset({
       name: "",
+      yearOfStudy: "",
       code: "",
       institution: "",
       department: "",
@@ -122,9 +130,9 @@ export default function BatchManagement() {
 
   const openEditModal = (batch) => {
     setEditingBatch(batch);
-    const isDefaultBatchName = batch.name?.startsWith("Batch ") && (batch.name?.includes("Training") || batch.name?.includes("Days"));
     reset({
-      name: isDefaultBatchName ? "" : batch.name,
+      name: batch.name || "",
+      yearOfStudy: batch.yearOfStudy || "",
       code: batch.code,
       institution: batch.institution || "",
       department: batch.department || "",
@@ -144,7 +152,8 @@ export default function BatchManagement() {
       if (editingBatch) {
         const payload = {
           ...data,
-          name: data.name?.trim() ? data.name.trim() : editingBatch.name
+          yearOfStudy: data.yearOfStudy || "",
+          name: editingBatch.name || getBatchDisplayName(editingBatch)
         };
         await API.put(`/batches/${editingBatch.id}`, payload);
         toast.success("Batch updated successfully!");
@@ -260,7 +269,7 @@ export default function BatchManagement() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                      {batch.name?.includes("Days") ? `Batch ${batch.code?.split("-")[0]?.replace("B", "") || ""} ${batch.institution}`.trim() : batch.name}
+                      {getBatchDisplayName(batch)}
                     </h3>
                   </div>
                   {user?.role === "ADMIN" && (
@@ -408,10 +417,10 @@ export default function BatchManagement() {
                   </label>
                   <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
                     <span className="px-2 py-0.5 rounded bg-indigo-600 text-white text-xs font-bold font-mono">
-                      {editingBatch.code?.split("-")[0] || "BATCH"}
+                      {editingBatch.code?.split("-")[0] || "B1"}
                     </span>
                     <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                      {editingBatch.name}
+                      {getBatchDisplayName(editingBatch)}
                     </span>
                   </div>
                 </div>
@@ -424,7 +433,7 @@ export default function BatchManagement() {
                     type="text"
                     {...register("code")}
                     className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none font-mono"
-                    placeholder="e.g. B1-7984-876"
+                    placeholder="e.g. B1"
                   />
                   {errors.code && (
                     <p className="mt-1 text-xs text-rose-500 font-medium">{errors.code.message}</p>
@@ -471,12 +480,12 @@ export default function BatchManagement() {
                 </label>
                 <input
                   type="text"
-                  {...register("name")}
+                  {...register("yearOfStudy")}
                   className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                   placeholder="e.g. 1st Year, 2nd Year, 3rd Year, Final Year"
                 />
-                {errors.name && (
-                  <p className="mt-1 text-xs text-rose-500 font-medium">{errors.name.message}</p>
+                {errors.yearOfStudy && (
+                  <p className="mt-1 text-xs text-rose-500 font-medium">{errors.yearOfStudy.message}</p>
                 )}
               </div>
 
