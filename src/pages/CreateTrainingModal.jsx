@@ -26,9 +26,10 @@ export default function CreateTrainingModal({ isOpen, onClose, onSuccess, instit
 
   const handleSelectConsecutive = () => {
     // Quick helper to pre-fill N weekdays starting tomorrow or today
+    const count = parseInt(totalDays, 10) || 1;
     const dates = [];
     const cur = new Date();
-    while (dates.length < totalDays) {
+    while (dates.length < count) {
       cur.setDate(cur.getDate() + 1);
       // Skip Sundays (0) if desired, or include all days
       const dateStr = cur.toISOString().split("T")[0];
@@ -128,7 +129,13 @@ export default function CreateTrainingModal({ isOpen, onClose, onSuccess, instit
                 min="1"
                 max="50"
                 value={batchCount}
-                onChange={(e) => setBatchCount(parseInt(e.target.value, 10) || 1)}
+                onChange={(e) => setBatchCount(e.target.value)}
+                onBlur={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (isNaN(val) || val < 1) setBatchCount(1);
+                  else if (val > 50) setBatchCount(50);
+                  else setBatchCount(val);
+                }}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-semibold text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-indigo-500 outline-none"
                 required
               />
@@ -165,7 +172,13 @@ export default function CreateTrainingModal({ isOpen, onClose, onSuccess, instit
                 min="1"
                 max="120"
                 value={totalDays}
-                onChange={(e) => setTotalDays(parseInt(e.target.value, 10) || 1)}
+                onChange={(e) => setTotalDays(e.target.value)}
+                onBlur={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (isNaN(val) || val < 1) setTotalDays(1);
+                  else if (val > 120) setTotalDays(120);
+                  else setTotalDays(val);
+                }}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-semibold text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-indigo-500 outline-none"
                 required
               />
