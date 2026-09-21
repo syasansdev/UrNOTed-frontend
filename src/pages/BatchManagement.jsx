@@ -350,23 +350,23 @@ export default function BatchManagement() {
                 >
                   <Copy size={14} />
                 </button>
+                {(user?.role === "ADMIN" || user?.role === "TRAINER") && (
+                  <button
+                    onClick={() => setManualStudentBatch(batch)}
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
+                    title="Add Student Manually"
+                  >
+                    <UserPlus size={14} />
+                  </button>
+                )}
                 {user?.role === "ADMIN" && (
-                  <>
-                    <button
-                      onClick={() => setManualStudentBatch(batch)}
-                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
-                      title="Add Student Manually"
-                    >
-                      <UserPlus size={14} />
-                    </button>
-                    <button
-                      onClick={() => setUploadBatchId(batch.id)}
-                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
-                      title="Upload Students via Excel"
-                    >
-                      <FileSpreadsheet size={14} />
-                    </button>
-                  </>
+                  <button
+                    onClick={() => setUploadBatchId(batch.id)}
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
+                    title="Upload Students via Excel"
+                  >
+                    <FileSpreadsheet size={14} />
+                  </button>
                 )}
               </div>
             </div>
