@@ -285,7 +285,12 @@ export default function AttendanceSheet() {
         </div>
 
         {sheet && (
-          <div className="flex items-center gap-2 mt-4 md:mt-0">
+          <div className="flex flex-wrap items-center gap-2 mt-4 md:mt-0">
+            {sheet.markedByTrainerName && (
+              <span className="px-3 py-1 text-xs font-semibold rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center gap-1">
+                Marked by: {sheet.markedByTrainerName}
+              </span>
+            )}
             {sheet.isRegistrationDay && (
               <span className="px-3 py-1 text-xs font-semibold rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
                 Registration Day (No Attendance)

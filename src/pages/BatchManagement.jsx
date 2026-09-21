@@ -27,7 +27,7 @@ import AddStudentManualModal from "../components/AddStudentManualModal";
 import CreateTrainingModal from "./CreateTrainingModal";
 
 const schema = z.object({
-  name: z.string().min(3, "Batch name must be at least 3 characters"),
+  name: z.string().min(1, "Year of study is required"),
   code: z.string().min(2, "Batch code must be at least 2 characters"),
   institution: z.string().min(2, "Institution is required"),
   department: z.string().min(2, "Department is required"),
@@ -36,7 +36,7 @@ const schema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
   totalDays: z.coerce.number().int().positive("Total days must be positive"),
-  trainerId: z.string().min(1, "Trainer is required")
+  trainerId: z.string().optional().or(z.literal(""))
 });
 
 export default function BatchManagement() {
@@ -132,7 +132,7 @@ export default function BatchManagement() {
       startDate: new Date(batch.startDate).toISOString().split("T")[0],
       endDate: new Date(batch.endDate).toISOString().split("T")[0],
       totalDays: batch.totalDays,
-      trainerId: batch.trainerId
+      trainerId: batch.trainerId || ""
     });
     setModalOpen(true);
   };
@@ -281,8 +281,12 @@ export default function BatchManagement() {
 
                 <div className="space-y-1.5 text-sm text-slate-500 dark:text-slate-400">
                   <p>
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">Year of study: </span>
+                    {batch.name}
+                  </p>
+                  <p>
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Trainer: </span>
-                    {batch.trainer?.name || "Unassigned"}
+                    {batch.trainer?.name || "All Trainers (Open Access)"}
                   </p>
                   {batch.institution && (
                     <p>
@@ -392,13 +396,13 @@ export default function BatchManagement() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                  Batch Name
+                  Year of Study
                 </label>
                 <input
                   type="text"
                   {...register("name")}
                   className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                  placeholder="e.g. MERN Fullstack Cohort A"
+                  placeholder="e.g. 1st Year, 2nd Year, 3rd Year, Final Year"
                 />
                 {errors.name && (
                   <p className="mt-1 text-xs text-rose-500 font-medium">{errors.name.message}</p>
@@ -529,25 +533,7 @@ export default function BatchManagement() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                  Assign Trainer
-                </label>
-                <select
-                  {...register("trainerId")}
-                  className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 dark:text-slate-100"
-                >
-                  <option value="" className="text-slate-900">-- Select Trainer --</option>
-                  {trainers.map((t) => (
-                    <option key={t.id} value={t.id} className="text-slate-900">
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.trainerId && (
-                  <p className="mt-1 text-xs text-rose-500 font-medium">{errors.trainerId.message}</p>
-                )}
-              </div>
+
 
               <div className="flex justify-end gap-3 mt-6">
                 <button

@@ -258,11 +258,12 @@ export default function AttendanceMatrix() {
                 {/* Training Dates Columns */}
                 {data.officialDates?.map((d) => {
                   const isToday = d.dateString === activeDateString;
+                  const markedBy = data.markedByByDate?.[d.dateString] || data.markedByByDate?.[`day_${d.dayNumber}`];
 
                   return (
                     <th
                       key={d.dateString}
-                      className={`py-3 px-3 font-semibold uppercase text-center min-w-[70px] border-r border-slate-200 dark:border-slate-700 transition-colors ${
+                      className={`py-3 px-3 font-semibold uppercase text-center min-w-[85px] border-r border-slate-200 dark:border-slate-700 transition-colors ${
                         isToday
                           ? "bg-indigo-600 text-white font-bold ring-2 ring-indigo-500 shadow-md"
                           : "text-slate-600 dark:text-slate-300"
@@ -274,6 +275,18 @@ export default function AttendanceMatrix() {
                         {isToday && (
                           <span className="text-[9px] bg-white text-indigo-700 px-1 rounded font-extrabold mt-0.5">
                             EDITABLE
+                          </span>
+                        )}
+                        {markedBy && (
+                          <span 
+                            className={`text-[9px] mt-1 px-1.5 py-0.5 rounded font-medium max-w-[100px] truncate ${
+                              isToday 
+                                ? "bg-indigo-700 text-indigo-100" 
+                                : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
+                            }`}
+                            title={`Marked by Trainer: ${markedBy}`}
+                          >
+                            {markedBy}
                           </span>
                         )}
                       </div>
