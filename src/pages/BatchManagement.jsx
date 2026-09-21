@@ -28,7 +28,7 @@ import CreateTrainingModal from "./CreateTrainingModal";
 
 const schema = z.object({
   name: z.string().min(1, "Year of study is required"),
-  code: z.string().min(2, "Batch code must be at least 2 characters"),
+  code: z.string().optional().or(z.literal("")),
   institution: z.string().min(2, "Institution is required"),
   department: z.string().min(2, "Department is required"),
   classroomNumber: z.string().optional().or(z.literal("")),
@@ -394,21 +394,39 @@ export default function BatchManagement() {
             </h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                  Year of Study
-                </label>
-                <input
-                  type="text"
-                  {...register("name")}
-                  className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                  placeholder="e.g. 1st Year, 2nd Year, 3rd Year, Final Year"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-xs text-rose-500 font-medium">{errors.name.message}</p>
-                )}
-              </div>
+              {/* Line 1: Batch Number / Code (Display only, no need of editable batch code) */}
+              {editingBatch ? (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                    Batch Number / Code
+                  </label>
+                  <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                    <span className="px-2 py-0.5 rounded bg-indigo-600 text-white text-xs font-bold font-mono">
+                      {editingBatch.code?.split("-")[0] || "BATCH"}
+                    </span>
+                    <span className="text-sm font-semibold font-mono text-slate-800 dark:text-slate-200">
+                      {editingBatch.code}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    Batch Code
+                  </label>
+                  <input
+                    type="text"
+                    {...register("code")}
+                    className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none font-mono"
+                    placeholder="e.g. B1-7984-876"
+                  />
+                  {errors.code && (
+                    <p className="mt-1 text-xs text-rose-500 font-medium">{errors.code.message}</p>
+                  )}
+                </div>
+              )}
 
+              {/* Line 2: Institution Name */}
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Institution Name
@@ -424,6 +442,7 @@ export default function BatchManagement() {
                 )}
               </div>
 
+              {/* Line 3: Department Name */}
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Department Name
@@ -439,6 +458,23 @@ export default function BatchManagement() {
                 )}
               </div>
 
+              {/* Line 4: Year of Study */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  Year of Study
+                </label>
+                <input
+                  type="text"
+                  {...register("name")}
+                  className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                  placeholder="e.g. 1st Year, 2nd Year, 3rd Year, Final Year"
+                />
+                {errors.name && (
+                  <p className="mt-1 text-xs text-rose-500 font-medium">{errors.name.message}</p>
+                )}
+              </div>
+
+              {/* Block and Classroom */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
@@ -471,36 +507,20 @@ export default function BatchManagement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                    Batch Code
-                  </label>
-                  <input
-                    type="text"
-                    {...register("code")}
-                    className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                    placeholder="MERN-CO-A"
-                  />
-                  {errors.code && (
-                    <p className="mt-1 text-xs text-rose-500 font-medium">{errors.code.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                    Total Days
-                  </label>
-                  <input
-                    type="number"
-                    {...register("totalDays")}
-                    className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                    placeholder="10"
-                  />
-                  {errors.totalDays && (
-                    <p className="mt-1 text-xs text-rose-500 font-medium">{errors.totalDays.message}</p>
-                  )}
-                </div>
+              {/* Total Days */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  Total Days
+                </label>
+                <input
+                  type="number"
+                  {...register("totalDays")}
+                  className="w-full px-4 py-2 border rounded-lg text-sm bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                  placeholder="10"
+                />
+                {errors.totalDays && (
+                  <p className="mt-1 text-xs text-rose-500 font-medium">{errors.totalDays.message}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

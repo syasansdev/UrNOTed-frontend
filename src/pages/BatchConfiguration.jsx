@@ -14,7 +14,8 @@ import {
   Loader2, 
   ChevronLeft,
   Calendar,
-  Grid
+  Grid,
+  GraduationCap
 } from "lucide-react";
 import StudentExcelUploadModal from "../components/StudentExcelUploadModal";
 
@@ -197,14 +198,18 @@ export default function BatchConfiguration() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-sm">
-                    {index + 1}
+                  <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-black text-sm tracking-wide shadow-sm">
+                    B{index + 1}
                   </span>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                      {batch.name}
-                    </h3>
-                    <p className="text-xs text-slate-400">Code: {batch.code}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200/60 dark:border-indigo-800/60">
+                        {batch.code}
+                      </span>
+                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                        {batch.name}
+                      </h3>
+                    </div>
                   </div>
                 </div>
 
@@ -212,7 +217,7 @@ export default function BatchConfiguration() {
                   {getStatusBadge(batch)}
                   <button
                     onClick={() => navigate(`/attendance/matrix/${batch.id}`)}
-                    className="px-3 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg border border-indigo-200 dark:border-indigo-800 transition-colors flex items-center gap-1"
+                    className="px-3 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg border border-indigo-200 dark:border-indigo-800 transition-colors flex items-center gap-1 cursor-pointer"
                   >
                     <Grid size={13} /> View Attendance
                   </button>
@@ -269,23 +274,21 @@ export default function BatchConfiguration() {
                   </div>
                 </div>
 
-                {/* Assigned Trainer */}
+                {/* Year of Study */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                    Assigned Trainer
+                    Year of Study
                   </label>
-                  <select
-                    value={form.trainerId || ""}
-                    onChange={(e) => handleFieldChange(batch.id, "trainerId", e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-indigo-500 outline-none"
-                  >
-                    <option value="">Select Trainer (Optional)</option>
-                    {trainers.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name} ({t.email})
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <GraduationCap className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      value={form.name || ""}
+                      onChange={(e) => handleFieldChange(batch.id, "name", e.target.value)}
+                      placeholder="e.g. 1st Year, 2nd Year, 3rd Year"
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
                 </div>
               </div>
 
