@@ -43,6 +43,7 @@ export default function BatchConfiguration() {
       for (const b of res.data.batches) {
         forms[b.id] = {
           name: b.name,
+          yearOfStudy: (b.yearOfStudy || (!b.name?.startsWith("Batch ") ? b.name : "")),
           department: b.department || "",
           blockName: b.blockName || "",
           classroomNumber: b.classroomNumber || "",
@@ -89,7 +90,14 @@ export default function BatchConfiguration() {
 
     setSavingBatchId(batchId);
     try {
-      await API.patch(`/training-programs/batches/${batchId}/configure`, formData);
+      const payload = {
+        department: formData.department,
+        blockName: formData.blockName,
+        classroomNumber: formData.classroomNumber,
+        yearOfStudy: formData.yearOfStudy,
+        ...(formData.yearOfStudy ? { name: formData.yearOfStudy } : {})
+      };
+      await API.patch(`/training-programs/batches/${batchId}/configure`, payload);
       toast.success("Batch configuration saved!");
       fetchProgram();
     } catch (err) {
@@ -202,14 +210,9 @@ export default function BatchConfiguration() {
                     B{index + 1}
                   </span>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200/60 dark:border-indigo-800/60">
-                        {batch.code}
-                      </span>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                        {batch.name}
-                      </h3>
-                    </div>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                      Batch {index + 1} {program.institution}
+                    </h3>
                   </div>
                 </div>
 
@@ -283,8 +286,8 @@ export default function BatchConfiguration() {
                     <GraduationCap className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                     <input
                       type="text"
-                      value={form.name || ""}
-                      onChange={(e) => handleFieldChange(batch.id, "name", e.target.value)}
+                      value={form.yearOfStudy || ""}
+                      onChange={(e) => handleFieldChange(batch.id, "yearOfStudy", e.target.value)}
                       placeholder="e.g. 1st Year, 2nd Year, 3rd Year"
                       className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-indigo-500 outline-none"
                     />

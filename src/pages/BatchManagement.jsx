@@ -27,7 +27,7 @@ import AddStudentManualModal from "../components/AddStudentManualModal";
 import CreateTrainingModal from "./CreateTrainingModal";
 
 const schema = z.object({
-  name: z.string().min(1, "Year of study is required"),
+  name: z.string().optional().or(z.literal("")),
   code: z.string().optional().or(z.literal("")),
   institution: z.string().min(2, "Institution is required"),
   department: z.string().min(2, "Department is required"),
@@ -122,8 +122,9 @@ export default function BatchManagement() {
 
   const openEditModal = (batch) => {
     setEditingBatch(batch);
+    const isDefaultBatchName = batch.name?.startsWith("Batch ") && (batch.name?.includes("Training") || batch.name?.includes("Days"));
     reset({
-      name: batch.name,
+      name: isDefaultBatchName ? "" : batch.name,
       code: batch.code,
       institution: batch.institution || "",
       department: batch.department || "",
@@ -141,7 +142,11 @@ export default function BatchManagement() {
     setSubmitting(true);
     try {
       if (editingBatch) {
-        await API.put(`/batches/${editingBatch.id}`, data);
+        const payload = {
+          ...data,
+          name: data.name?.trim() ? data.name.trim() : editingBatch.name
+        };
+        await API.put(`/batches/${editingBatch.id}`, payload);
         toast.success("Batch updated successfully!");
       } else {
         await API.post("/batches", data);
@@ -254,10 +259,9 @@ export default function BatchManagement() {
               <div className="space-y-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full">
-                      {batch.code}
-                    </span>
-                    <h3 className="text-lg font-bold tracking-tight mt-2">{batch.name}</h3>
+                    <h3 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                      {batch.name?.includes("Days") ? `Batch ${batch.code?.split("-")[0]?.replace("B", "") || ""} ${batch.institution}`.trim() : batch.name}
+                    </h3>
                   </div>
                   {user?.role === "ADMIN" && (
                     <div className="flex gap-1.5">
@@ -280,10 +284,12 @@ export default function BatchManagement() {
                 </div>
 
                 <div className="space-y-1.5 text-sm text-slate-500 dark:text-slate-400">
-                  <p>
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Year of study: </span>
-                    {batch.name}
-                  </p>
+                  {batch.yearOfStudy && (
+                    <p>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">Year of study: </span>
+                      {batch.yearOfStudy}
+                    </p>
+                  )}
                   <p>
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Trainer: </span>
                     {batch.trainer?.name || "All Trainers (Open Access)"}
@@ -394,18 +400,18 @@ export default function BatchManagement() {
             </h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Line 1: Batch Number / Code (Display only, no need of editable batch code) */}
+              {/* Line 1: Batch Number (e.g. Batch 1 sjce) */}
               {editingBatch ? (
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                    Batch Number / Code
+                    Batch Number
                   </label>
-                  <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
                     <span className="px-2 py-0.5 rounded bg-indigo-600 text-white text-xs font-bold font-mono">
                       {editingBatch.code?.split("-")[0] || "BATCH"}
                     </span>
-                    <span className="text-sm font-semibold font-mono text-slate-800 dark:text-slate-200">
-                      {editingBatch.code}
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      {editingBatch.name}
                     </span>
                   </div>
                 </div>
